@@ -56,30 +56,6 @@ def read_json(filename):
     return json_content
 
 
-def get_console_input():
-    """
-    Just dialog to setup how long the script should be run
-    :return: seconds_until_terminate, tracking_period
-    """
-    seconds_until_terminate = None
-    while not type(seconds_until_terminate) == int:
-        seconds_until_terminate = input('How long should the script be run in seconds?\n')
-        try:
-            seconds_until_terminate = int(seconds_until_terminate)
-        except:
-            pass
-
-    tracking_period = None
-    while not type(tracking_period) == int:
-        tracking_period = input('How much time should be between each request?\n')
-        try:
-            tracking_period = int(tracking_period)
-        except:
-            pass
-
-    return seconds_until_terminate, tracking_period
-
-
 def check_config_files():
     """
     # On first start or if files are missing the write_json() methods will / can be executed
@@ -108,7 +84,6 @@ def main():
     :return: List of all given persons with indicator if person is at home or not
     """
     check_config_files()  # checks if files are missing
-    seconds_until_terminate, tracking_period = get_console_input()  # user input for length of script time
 
     # persons from whom you know the ip and want to track
     # rather choose the ips of mobile phones because these should be a good indicator if somebody is at home
@@ -126,10 +101,10 @@ def main():
         fritz_logins.append([x['ip'], x['password']])
 
     home_network_checker = HomeNetworkChecker(fritz_logins=fritz_logins,
-                                              persons=persons,
-                                              tracking_period=tracking_period)
+                                              persons=persons)
     print('Initialized HomeNetworkChecker')
-    home_network_checker.monitor_home_network(seconds_until_terminate=seconds_until_terminate)
+    # home_network_checker.monitor_home_network()
+    print(home_network_checker.track_specific_person())
 
 
 if __name__ == '__main__':
