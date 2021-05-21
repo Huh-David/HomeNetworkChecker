@@ -5,16 +5,16 @@ from fritzconnection.lib.fritzwlan import FritzWLAN
 from fritzconnection.core.exceptions import FritzServiceError
 
 
-class PersonChecker:
+class HomeNetworkChecker:
     fwlans: [FritzWLAN] = []
 
-    def __init__(self, fritz_addresses, persons, tracking_period):
+    def __init__(self, fritz_logins, persons, tracking_period):
         """
-        :param fritz_addresses: ips of FritzBOXs and FritzREPEATERs with passwords
+        :param fritz_logins: ips of FritzBOXs and FritzREPEATERs with passwords
         :param persons: ips of persons with name
         :param tracking_period: time between each check
         """
-        self.fritz_addresses = fritz_addresses
+        self.fritz_addresses = fritz_logins
         self.persons = persons
         self.tracking_period = tracking_period
 
