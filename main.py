@@ -103,8 +103,8 @@ def main():
     home_network_checker = HomeNetworkChecker(fritz_logins=fritz_logins,
                                               persons=persons)
     print('Initialized HomeNetworkChecker')
-    # home_network_checker.monitor_home_network()
-    print(home_network_checker.track_specific_person())
+    home_network_checker.monitor_home_network()
+    # home_network_checker.track_specific_person()
 
 
 if __name__ == '__main__':

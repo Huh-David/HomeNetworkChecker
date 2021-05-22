@@ -122,7 +122,7 @@ class HomeNetworkChecker:
         for address, password in self.fritz_addresses:
             self.fwlans.append(FritzWLAN(address=address, password=password))
 
-    def track_specific_person(self):
+    def track_specific_person(self, delay=0):
         """
         Use this function to track one specific person until he or she gets home
         :param person: combination of ip and name as follows
@@ -142,18 +142,24 @@ class HomeNetworkChecker:
             'name': self.persons[person_index][1]
         }
 
-        ips = self.get_ips_from_fwlans()
+        time.sleep(delay)
 
         if self.seconds_until_terminate == 0:
             while True:
+                ips = self.get_ips_from_fwlans()
                 if person['ip'] in ips:
                     notify_windows_toast(person['name'])
+
+                print('waiting for ' + str(person['name']))
                 time.sleep(self.tracking_period)
         else:
             time_end = time.time() + self.seconds_until_terminate
             while time.time() < time_end:
+                ips = self.get_ips_from_fwlans()
                 if person['ip'] in ips:
                     notify_windows_toast(person['name'])
+
+                print('waiting for ' + str(person['name']))
                 time.sleep(self.tracking_period)
 
     def monitor_home_network(self):
