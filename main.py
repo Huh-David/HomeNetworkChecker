@@ -2,11 +2,14 @@ from home_network_checker import HomeNetworkChecker
 import json
 import os
 
+from sql_connection import sql_connection
+
 
 def write_json():
     """
     On the initial start you will be asked to add some basic configuration for the program to work.
-    If there are changes in configuration, just delete existing persons.json and fritz_logins.json.
+    If there are changes in configuration, just delete existing persons.json & fritz_logins.json
+    and let them generate by the script itself.
 
     for example:
 
@@ -33,7 +36,7 @@ def write_json():
     addresses = {
         'fritz_logins': [
             {'ip': '192.168.188.1', 'password': 'password'},
-            {'ip': '192.168.188.2', 'password': 'password'},
+            {'ip': '192.168.188.2', 'password': 'password'}
         ]
     }
 
@@ -103,8 +106,9 @@ def main():
     home_network_checker = HomeNetworkChecker(fritz_logins=fritz_logins,
                                               persons=persons)
     print('Initialized HomeNetworkChecker')
-    home_network_checker.monitor_home_network()
+    # home_network_checker.monitor_home_network()
     # home_network_checker.track_specific_person()
+    home_network_checker.monitor_home_network_once_and_save_to_db()
 
 
 if __name__ == '__main__':

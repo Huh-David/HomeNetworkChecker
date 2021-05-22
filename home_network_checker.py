@@ -6,6 +6,8 @@ from fritzconnection.lib.fritzwlan import FritzWLAN
 from fritzconnection.core.exceptions import FritzServiceError
 from win10toast import ToastNotifier
 
+from sql_connection import sql_connection
+
 
 def get_active_ips_of_fwlan(fwlan):
     """
@@ -28,32 +30,6 @@ def get_active_ips_of_fwlan(fwlan):
             ip_addresses.append(ip)
 
     return active_ips
-
-
-def get_console_input():
-    """
-    Just dialog to setup how long the script should be run
-    tracking_period: time between each check
-    seconds_until_terminate: seconds until scripts ends
-    :return: seconds_until_terminate, tracking_period
-    """
-    seconds_until_terminate = None
-    while not type(seconds_until_terminate) == int:
-        seconds_until_terminate = input('How long should the script be run in seconds?\n\'0\' for unlimited\n')
-        try:
-            seconds_until_terminate = int(seconds_until_terminate)
-        except:
-            pass
-
-    tracking_period = None
-    while not type(tracking_period) == int:
-        tracking_period = input('How much time should be between each request?\n')
-        try:
-            tracking_period = int(tracking_period)
-        except:
-            pass
-
-    return seconds_until_terminate, tracking_period
 
 
 def notify_windows_toast(person):
@@ -82,11 +58,34 @@ class HomeNetworkChecker:
         self.tracking_period = 0
         self.seconds_until_terminate = 0
 
-        # user input for length of script time
-        self.seconds_until_terminate, self.tracking_period = get_console_input()
-
         # instantiate fwlans once in __init__ for improved performance
         self.instantiate_fwlans()
+
+    def get_console_input(self):
+        """
+        Just dialog to setup how long the script should be run
+        tracking_period: time between each check
+        seconds_until_terminate: seconds until scripts ends
+        :return: seconds_until_terminate, tracking_period
+        """
+        seconds_until_terminate = None
+        while not type(seconds_until_terminate) == int:
+            seconds_until_terminate = input('How long should the script be run in seconds?\n\'0\' for unlimited\n')
+            try:
+                seconds_until_terminate = int(seconds_until_terminate)
+            except:
+                pass
+
+        tracking_period = None
+        while not type(tracking_period) == int:
+            tracking_period = input('How much time should be between each request?\n')
+            try:
+                tracking_period = int(tracking_period)
+            except:
+                pass
+
+        self.seconds_until_terminate = seconds_until_terminate
+        self.tracking_period = tracking_period
 
     def get_ips_from_fwlans(self) -> [str]:
         """
@@ -109,9 +108,9 @@ class HomeNetworkChecker:
         persons_at_home = []
         for ip, person in self.persons:
             if ip in ips:
-                persons_at_home.append([person, True])
+                persons_at_home.append((person, True))
             else:
-                persons_at_home.append([person, False])
+                persons_at_home.append((person, False))
 
         return persons_at_home
 
@@ -125,17 +124,23 @@ class HomeNetworkChecker:
     def track_specific_person(self, delay=0):
         """
         Use this function to track one specific person until he or she gets home
-        :param person: combination of ip and name as follows
+        :param delay: delay in seconds until the script starts
+
+        person: combination of ip and name as follows
         e.g. {'ip': '192.168.188.42', 'name': 'Mom'}
+
         :return: Notification in windows
         """
+        # user input for length of script time
+        self.get_console_input()
+
         counter = 0
 
         for ip, person in self.persons:
             print(str(counter) + '.', str(person))
             counter += 1
 
-        person_index = int(input('Which person do you want to track?\nGive me the number in front of the person\n'))
+        person_index = int(input('\nWhich person do you want to track?\nGive me the number in front of the person\n'))
 
         person: {} = {
             'ip': self.persons[person_index][0],
@@ -165,9 +170,10 @@ class HomeNetworkChecker:
     def monitor_home_network(self):
         """
         Monitor active devices for x seconds
-        :param seconds_until_terminate: seconds until monitoring stops
         :return: returns nothing but prints list of persons with boolean
         """
+        # user input for length of script time
+        self.get_console_input()
 
         if self.seconds_until_terminate == 0:
             while True:
@@ -178,3 +184,16 @@ class HomeNetworkChecker:
             while time.time() < time_end:
                 print(self.get_persons_at_home())
                 time.sleep(self.tracking_period)
+
+    def monitor_home_network_once_and_save_to_db(self):
+        """
+        !!! Setup sql.ini properly and create the required table before with sql_connection.create_table()
+
+        Monitor active devices only once and saves result to database
+        :return: returns nothing but saves list of persons with boolean to database
+        """
+
+        mariadb_connection = sql_connection()
+        # mariadb_connection.create_table()
+
+        mariadb_connection.save_to_database(self.get_persons_at_home())

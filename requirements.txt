@@ -7,3 +7,4 @@ urllib3==1.26.4
 pypiwin32==223
 pywin32==300
 win10toast==0.9
+PyMySQL==1.0.2

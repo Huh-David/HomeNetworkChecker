@@ -1,6 +1,11 @@
 config.ini
+sql.ini
+
 .idea
+
 venv
+
 private_config.py
+
 fritz_logins.json
 persons.json
