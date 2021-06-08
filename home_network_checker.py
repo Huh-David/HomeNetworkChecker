@@ -118,8 +118,11 @@ class HomeNetworkChecker:
         """
         FritzWLAN instances should only be instantiated once to improve performance
         """
-        for address, password in self.fritz_addresses:
-            self.fwlans.append(FritzWLAN(address=address, password=password))
+        for address in self.fritz_addresses:
+            if len(address) > 2:
+                self.fwlans.append(FritzWLAN(address=address[0], user=address[2], password=address[1]))
+            else:
+                self.fwlans.append(FritzWLAN(address=address[0], password=address[1]))
 
     def track_specific_person(self, delay=0):
         """

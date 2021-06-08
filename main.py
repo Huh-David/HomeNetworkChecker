@@ -101,7 +101,10 @@ def main():
     fritz_logins: [[]] = []
 
     for x in fritz_logins_json['fritz_logins']:
-        fritz_logins.append([x['ip'], x['password']])
+        if 'username' in x:
+            fritz_logins.append([x['ip'], x['password'], x['username']])
+        else:
+            fritz_logins.append([x['ip'], x['password']])
 
     home_network_checker = HomeNetworkChecker(fritz_logins=fritz_logins,
                                               persons=persons)
